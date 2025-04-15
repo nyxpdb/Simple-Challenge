@@ -1,81 +1,110 @@
 
-# 🚀 Desafio Técnico – API de Transações Simples
+# Explicação do Algoritmo `nextPermutation`
 
-## 🧾 Objetivo
+Esse algoritmo serve para **calcular a próxima permutação lexicográfica** de um array de inteiros.
 
-Construir uma API REST com Java e Spring Boot que permita o **registro de transações financeiras** e a **consulta de estatísticas básicas** sobre todas as transações salvas.
+Se já estivermos na maior permutação possível (tipo `[3, 2, 1]`), ele volta pra menor (`[1, 2, 3]`).
 
 ---
 
-## 📌 Funcionalidades
+## 🧠 Passo a passo
 
-### 1. Criar Transação
+### 1. Achar o ponto de virada
 
-- **Endpoint**: `POST /transacoes`
-- **Request Body (JSON)**:
-```json
-{
-  "valor": 100.5,
-  "dataHora": "2025-04-14T13:45:00Z"
+```java
+int i = nums.length - 1;
+
+while (i > 0 && nums[i - 1] >= nums[i]) {
+    i--;
 }
 ```
 
-- `valor`: número decimal positivo.
-- `dataHora`: data e hora no padrão ISO 8601.
-
-**Respostas esperadas:**
-
-- `201 Created` – Transação salva com sucesso.
-- `400 Bad Request` – Se o valor for negativo ou algum campo estiver ausente.
+Aqui estamos procurando o primeiro número (da direita pra esquerda) que **quebra a ordem crescente**.  
+Esse ponto é onde podemos trocar algo pra fazer uma permutação maior.
 
 ---
 
-### 2. Consultar Estatísticas
+### 2. Verificar se o array é totalmente decrescente
 
-- **Endpoint**: `GET /estatisticas`
-- **Response Body (JSON)**:
-```json
-{
-  "soma": 2350.75,
-  "media": 1175.38,
-  "min": 100.5,
-  "max": 2250.25,
-  "quantidade": 2
+```java
+if (i == 0) {
+    reverse(nums, 0, nums.length - 1);
+    return;
 }
 ```
 
-- Os dados retornam as estatísticas **de todas as transações registradas até agora**.
+Se não acharmos nenhum número que quebre a ordem (`i == 0`), significa que o array está **em ordem decrescente**, ou seja, na última permutação.  
+A solução nesse caso é simplesmente **inverter tudo** para voltar à menor permutação.
 
 ---
 
-## 🎯 Requisitos Técnicos
+### 3. Achar o menor número maior que `nums[i - 1]`
 
-- Projeto em Java com Spring Boot.
-- API RESTful.
-- Armazenamento em memória (ex: lista em Java) ou banco de dados relacional (opcional).
-- Organização em camadas (Controller, Service, Repository).
-- Boas práticas de codificação e tratamento de erros.
+```java
+int j = nums.length - 1;
 
----
+while (j >= i && nums[j] <= nums[i - 1]) {
+    j--;
+}
+```
 
-## 💡 Extras Opcionais (Desafio Plus)
-
-- Persistência com banco de dados MySQL usando Spring Data JPA.
-- Validações com `@Valid` e Bean Validation.
-- Testes unitários com JUnit.
-- Documentação com Swagger/OpenAPI.
-- Deploy com Docker.
+Aqui procuramos da direita pra esquerda o menor número que seja **maior que `nums[i - 1]`**, pra trocar com ele.
 
 ---
 
-## ✅ Critérios de Avaliação
+### 4. Trocar os valores
 
-- Organização do projeto.
-- Clareza e simplicidade do código.
-- Funcionamento correto dos endpoints.
-- Uso adequado das ferramentas do Spring.
-- Validações e tratamento de erros.
+```java
+swap(nums, i - 1, j);
+```
+
+Fazemos a troca entre `nums[i - 1]` e `nums[j]`.
 
 ---
 
-Boa sorte e bons commits! 🚀
+### 5. Inverter o final
+
+```java
+reverse(nums, i, nums.length - 1);
+```
+
+Por fim, invertemos todos os números **à direita do ponto de virada** pra garantir que estamos pegando a menor sequência possível depois da troca.
+
+---
+
+## 💡 Exemplo prático
+
+Dado o array `[1, 2, 3]`:
+
+1. `i = 2`, pois `2 < 3`
+2. `j = 2`, pois `3 > 2`
+3. Troca `2` com `3` → `[1, 3, 2]`
+4. Inverte o final (só o 2) → continua `[1, 3, 2]`
+
+---
+
+## 🔁 Métodos auxiliares
+
+### Swap
+
+```java
+private void swap(int[] nums, int i, int j) {
+    int temp = nums[i];
+    nums[i] = nums[j];
+    nums[j] = temp;
+}
+```
+
+### Reverse
+
+```java
+private void reverse(int[] nums, int start, int end) {
+    while (start < end) {
+        int temp = nums[start];
+        nums[start] = nums[end];
+        nums[end] = temp;
+        start++;
+        end--;
+    }
+}
+```
